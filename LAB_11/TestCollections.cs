@@ -1,5 +1,6 @@
 ﻿using ClassLibrary1;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
@@ -22,10 +23,10 @@ public class TestCollections
             {
                 lorry = new LorryCar();
                 lorry.RandomInit();
-                collection1.AddLast(lorry);
-                collection2.AddLast(lorry.ToString());
                 collection3.Add(lorry.GetBase, lorry);
                 collection4.Add(lorry.GetBase.ToString(), lorry);
+                collection1.AddLast(lorry);
+                collection2.AddLast(lorry.ToString());
                 if (i == 0)
                 {
                     first = (LorryCar)lorry.Clone();
@@ -51,206 +52,188 @@ public class TestCollections
         noExist = (LorryCar)lorry.Clone();
     }
 
-    public void SearchAll(int typeSearch, int count)
+    public struct Result
     {
-        long sum; //Для записи суммы тиков
+        public long timeInLinkedListLorryCar;
+        public long timeInLinkedListString;
+        public long timeInSortedDictionaryCarLorryCarKey;
+        public long timeInSortedDictionaryCarLorryCarValue;
+        public long timeInSortedDictionaryStringLorryCarKey;
+        public long timeInSortedDictionaryStringLorryCarValue;
+        public int index1;
+        public int index2;
+        public int index3;
+        public int index4;
+        public int index5;
+        public int index6;
+    }
 
-        List<LorryCar> lorriesLorryCar = new List<LorryCar>(); //Лист для записи грузовиков для поиска в коллекциях с номерами 1, 3, 4
-        List<Car> lorriesCar = new List<Car>(); //Лист для записи машин для поиска в коллекции 3
-        List<string> lorriesString = new List<string>(); //Лист для записи строк для поиска в коллекциях 2, 4
+    public void Search(int count)
+    {
+        LorryCar[] lorries = new LorryCar[] { first, middle, last, noExist };
+        bool isFound;
+        Result[] results = new Result[4];
 
-        List<long> times = new List<long>(); //Лист для записи времени для какждого элемента поиска
-        List<bool> carIsFoundList = new List<bool>(); //Лист для записи флага: нашли элемент или нет
-        bool carIsFound = false; //Сам флаг
-
-        if (typeSearch == 1) //Поиск в LinkedList<LorryCar>
+        for (int i = 0; i < 4; i++)
         {
-            lorriesLorryCar.Add(first); //Добавляем в лист
-            lorriesLorryCar.Add(middle);
-            lorriesLorryCar.Add(last);
-            lorriesLorryCar.Add(noExist);
-            foreach (LorryCar lorry in lorriesLorryCar) //Перебираем элементы в листе
-            {
-                sum = 0; //Для какждого элемента своя сумма
-                for (int i = 0; i < count; i++) //count раз повторяем замер времени
-                {
-                    watch.Restart(); //Включили счётчик
-                    carIsFound = collection1.Contains(lorry); //Ищем элемент
-                    watch.Stop(); //Выключили счётчик
-                    sum += watch.ElapsedTicks; //Прибавили время к сумме
-                }
-                carIsFoundList.Add(carIsFound); //Записали: нашли элемент или нет
-                times.Add(sum / count); //Записали среднее время
-            }
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Поиск в LinkedList<LorryCar>");
-            Console.ResetColor();
-        }
-        //Далее всё аналогично и имеет место определённое повторение, но сократить код ещё больше не удалось
-        else if (typeSearch == 2)
-        {
-            lorriesString.Add(first.ToString());
-            lorriesString.Add(middle.ToString());
-            lorriesString.Add(last.ToString());
-            lorriesString.Add(noExist.ToString());
-            foreach (string lorry in lorriesString)
-            {
-                sum = 0;
-                for (int i = 0; i < count; i++)
-                {
-                    watch.Restart();
-                    carIsFound = collection2.Contains(lorry);
-                    watch.Stop();
-                    sum += watch.ElapsedTicks;
-                }
-                carIsFoundList.Add(carIsFound);
-                times.Add(sum / count);
-            }
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Поиск в LinkedList<string>");
-            Console.ResetColor();
-        }
+            long sum1 = 0;
+            long sum2 = 0;
+            long sum3 = 0;
+            long sum4 = 0;
+            long sum5 = 0;
+            long sum6 = 0;
 
-        else if (typeSearch == 3)
-        {
-            lorriesCar.Add(first.GetBase);
-            lorriesCar.Add(middle.GetBase);
-            lorriesCar.Add(last.GetBase);
-            lorriesCar.Add(noExist.GetBase);
-            foreach (Car lorry in lorriesCar)
-            {
-                sum = 0;
-                for (int i = 0; i < count; i++)
-                {
-                    watch.Restart();
-                    carIsFound = collection3.ContainsKey(lorry);
-                    watch.Stop();
-                    sum += watch.ElapsedTicks;
-                }
-                carIsFoundList.Add(carIsFound);
-                times.Add(sum / count);
-            }
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Поиск в SortedDictionary<Car, LorryCar> по ключу");
-            Console.ResetColor();
-        }
+            LorryCar itemToSearch;
 
-        else if (typeSearch == 4)
-        {
-            lorriesLorryCar.Add(first);
-            lorriesLorryCar.Add(middle);
-            lorriesLorryCar.Add(last);
-            lorriesLorryCar.Add(noExist);
-            foreach (LorryCar lorry in lorriesLorryCar)
+            for (int j = 0; j < count; j++) 
             {
-                sum = 0;
-                for (int i = 0; i < count; i++)
-                {
-                    watch.Restart();
-                    carIsFound = collection3.ContainsValue(lorry);
-                    watch.Stop();
-                    sum += watch.ElapsedTicks;
-                }
-                carIsFoundList.Add(carIsFound);
-                times.Add(sum / count);
-            }
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Поиск в SortedDictionary<Car, LorryCar> по значению");
-            Console.ResetColor();
-        }
+                itemToSearch = lorries[i];
 
-        else if (typeSearch == 5)
-        {
-            lorriesString.Add(first.GetBase.ToString());
-            lorriesString.Add(middle.GetBase.ToString());
-            lorriesString.Add(last.GetBase.ToString());
-            lorriesString.Add(noExist.GetBase.ToString());
-            foreach (string lorry in lorriesString)
-            {
-                sum = 0;
-                for (int i = 0; i < count; i++)
-                {
-                    watch.Restart();
-                    carIsFound = collection4.ContainsKey(lorry);
-                    watch.Stop();
-                    sum += watch.ElapsedTicks;
-                }
-                carIsFoundList.Add(carIsFound);
-                times.Add(sum / count);
-            }
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Поиск в SortedDictionary<string, LorryCar> по ключу");
-            Console.ResetColor();
-        }
+                watch.Restart();
+                isFound = collection1.Contains(itemToSearch);
+                watch.Stop();
+                sum1 += watch.ElapsedTicks;
 
-        else if (typeSearch == 6)
-        {
-            lorriesLorryCar.Add(first);
-            lorriesLorryCar.Add(middle);
-            lorriesLorryCar.Add(last);
-            lorriesLorryCar.Add(noExist);
-            foreach (LorryCar lorry in lorriesLorryCar)
-            {
-                sum = 0;
-                for (int i = 0; i < count; i++)
-                {
-                    watch.Restart();
-                    carIsFound = collection4.ContainsValue(lorry);
-                    watch.Stop();
-                    sum += watch.ElapsedTicks;
-                }
-                carIsFoundList.Add(carIsFound);
-                times.Add(sum / count);
+                string itemToSearchString = itemToSearch.ToString();
+                watch.Restart();
+                isFound = collection2.Contains(itemToSearchString);
+                watch.Stop();
+                sum2 += watch.ElapsedTicks;
+
+                Car itemToSearchCar = itemToSearch.GetBase;
+                watch.Restart();
+                isFound = collection3.ContainsKey(itemToSearchCar);
+                watch.Stop();
+                sum3 += watch.ElapsedTicks;
+
+                watch.Restart();
+                isFound = collection3.ContainsValue(itemToSearch);
+                watch.Stop();
+                sum4 += watch.ElapsedTicks;
+
+                string itemToSearchCarString = itemToSearch.GetBase.ToString();
+                watch.Restart();
+                isFound = collection4.ContainsKey(itemToSearchCarString);
+                watch.Stop();
+                sum5 += watch.ElapsedTicks;
+
+                watch.Restart();
+                isFound = collection4.ContainsValue(itemToSearch);
+                watch.Stop();
+                sum6 += watch.ElapsedTicks;
             }
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Поиск в SortedDictionary<string, LorryCar> по значению");
-            Console.ResetColor();
+            itemToSearch = lorries[i];
+            int index1 = -1;
+            int counter = 0;
+            foreach (LorryCar el in collection1)
+            {
+                if (el.Equals(itemToSearch))
+                {
+                    index1 = counter;
+                }
+                counter++;
+            }
+
+            int index2 = -1;
+            counter = 0;
+            foreach (string el in collection2)
+            {
+                if (el == itemToSearch.ToString())
+                {
+                    index2 = counter;
+                }
+                counter++;
+            }
+
+            int index3 = -1;
+            counter = 0;
+            foreach (Car el in collection3.Keys)
+            {
+                if (el.Equals(itemToSearch.GetBase))
+                {
+                    index3 = counter;
+                }
+                counter++;
+            }
+
+            int index4 = -1;
+            counter = 0;
+            foreach (LorryCar el in collection3.Values)
+            {
+                if (el.Equals(itemToSearch))
+                {
+                    index4 = counter;
+                }
+                counter++;
+            }
+
+            int index5 = -1;
+            counter = 0;
+            foreach (string el in collection4.Keys)
+            {
+                if (el == itemToSearch.GetBase.ToString())
+                {
+                    index5 = counter;
+                }
+                counter++;
+            }
+
+            int index6 = -1;
+            counter = 0;
+            foreach (LorryCar el in collection4.Values)
+            {
+                if (el.Equals(itemToSearch))
+                {
+                    index6 = counter;
+                }
+                counter++;
+            }
+
+            results[i].timeInLinkedListLorryCar = sum1;
+            results[i].timeInLinkedListString = sum2;
+            results[i].timeInSortedDictionaryCarLorryCarKey = sum3;
+            results[i].timeInSortedDictionaryCarLorryCarValue = sum4;
+            results[i].timeInSortedDictionaryStringLorryCarKey = sum5;
+            results[i].timeInSortedDictionaryStringLorryCarValue = sum6;
+            results[i].index1 = index1;
+            results[i].index2 = index2;
+            results[i].index3 = index3;
+            results[i].index4 = index4;
+            results[i].index5 = index5;
+            results[i].index6 = index6;
         }
 
+        Console.WriteLine("Если позиция 0, то элемент не найден");
+        Console.WriteLine();
 
-        for (int i = 0; i < 4; i++) //Перебираем индексы от 0 до 3. Эти индексы будут соответсовать элементам сразу в двух листах: в carIsFoundList, и в times.
+        for (int i = 0; i < 4; i++)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("Поиск ");
             if (i == 0)
             {
-                Console.Write("Первый элемент: ");
+                Console.WriteLine("первого элемента: ");
             }
             else if (i == 1)
             {
-                Console.Write("Средний элемент: ");
+                Console.WriteLine("среднего элемента: ");
             }
             else if (i == 2)
             {
-                Console.Write("Последний элемент: ");
+                Console.WriteLine("последнего элемента: ");
             }
             else if (i == 3)
             {
-                Console.Write("Несуществующий элемент: ");
+                Console.WriteLine("несуществующего элемента: ");
             }
-
-            if (carIsFoundList[i])
-            {
-                Console.WriteLine($"найден в среднем за {times[i]}");
-            }
-            else
-            {
-                Console.WriteLine($"не найден в среднем за {times[i]}");
-            }
+            Console.ResetColor();
+            Console.WriteLine($"В LinkedList<LorryCar>: {results[i].timeInLinkedListLorryCar / count}. \tЭлемент находится в позиции {results[i].index1 + 1} из 1000");
+            Console.WriteLine($"В LinkedList<string>: {results[i].timeInLinkedListString / count}. \tЭлемент находится в позиции {results[i].index2 + 1} из 1000");
+            Console.WriteLine($"В SortedDictionary<Car, LorryCar> по ключу: {results[i].timeInSortedDictionaryCarLorryCarKey / count}. \tЭлемент находится в позиции {results[i].index3 + 1} из 1000");
+            Console.WriteLine($"В SortedDictionary<Car, LorryCar> по значению: {results[i].timeInSortedDictionaryCarLorryCarValue / count}. \tЭлемент находится в позиции {results[i].index4 + 1} из 1000");
+            Console.WriteLine($"В SortedDictionary<string, LorryCar> по ключу: {results[i].timeInSortedDictionaryStringLorryCarKey / count}. \tЭлемент находится в позиции {results[i].index5 + 1} из 1000");
+            Console.WriteLine($"В SortedDictionary<string, LorryCar> по значению: {results[i].timeInSortedDictionaryStringLorryCarValue / count}. \tЭлемент находится в позиции {results[i].index6 + 1} из 1000");
+            Console.WriteLine();
         }
-    }
-
-    public void SearchAllLaunch(int count) //Метод для того чтобы запустить все поиски
-    {
-        SearchAll(1, count);
-        Console.WriteLine();
-        SearchAll(2, count);
-        Console.WriteLine();
-        SearchAll(3, count);
-        Console.WriteLine();
-        SearchAll(4, count);
-        Console.WriteLine();
-        SearchAll(5, count);
-        Console.WriteLine();
-        SearchAll(6, count);
-        Console.WriteLine();
     }
 }

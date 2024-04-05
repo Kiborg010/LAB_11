@@ -2,7 +2,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
+using System.Runtime.Serialization;
 
 class Program
 {
@@ -234,13 +236,11 @@ class Program
                         cars.RemoveAt(1); //Удаялем первую легковую машину. Учитываем, что длина массива уменьшилась и индекс уменьшился.
 
                         LorryCar oFC = new LorryCar("Nissan", 1971, "Orange", 29121623, 7, 8, 204); //Тот самый повторяющийся грузовик
-                        
-                        for (int i = cars.Count - 1; i >= 0; i--) //Если перебирать элементы с конца, то можно спокойно удалять элементы
+
+                        while (cars.Contains(oFC))
                         {
-                            if (cars[i].Equals(oFC)) //Сравниваем
-                            {
-                                cars.RemoveAt(i); //Удаляем
-                            }
+                            int ind = cars.IndexOf(oFC);
+                            cars.RemoveAt(ind);
                         }
 
                         Console.ForegroundColor = ConsoleColor.Red;
@@ -255,12 +255,33 @@ class Program
                         Console.ResetColor();
 
                         Console.ForegroundColor = ConsoleColor.Blue;
-                        ArrayList carsClone = (ArrayList)cars.Clone(); //Выполняем клонирование
+                        ArrayList carsClone = new ArrayList(); //Выполняем клонирование
+
+                        foreach (var car in cars)
+                        {
+                            if (car is OffRoadCar)
+                            {
+                                carsClone.Add(((OffRoadCar)car).Clone());
+                            }
+                            else if (car is PassengerCar)
+                            {
+                                carsClone.Add(((PassengerCar)car).Clone());
+                            }
+                            else if (car is LorryCar)
+                            {
+                                carsClone.Add(((LorryCar)car).Clone());
+                            }
+                            else
+                            {
+                                carsClone.Add(((Car)car).Clone());
+                            }
+                        }
+
                         Console.WriteLine("\n\nПроизводим клонировании коллекции");
                         Console.ResetColor();
 
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("\n\nОтсортированная по цене коллекция: ");
+                        Console.WriteLine("\n\nОтсортированная коллекция: ");
                         Console.ResetColor();
                         cars.Sort(); //Производим сортировку
                         ShowCars(cars);
@@ -271,7 +292,7 @@ class Program
                         int index = cars.BinarySearch(forSearch); //Коллекция отсортирована. Можно воспользаваться бинарным поиском
                         if (index >= 0) //Если элемент не найден, то будет -1
                         {
-                            Console.WriteLine($"Элемент найден. Его порядковый номер в отсортированной коллекции: {index + 1}");
+                            Console.WriteLine($"Элемент найден");
                         }
                         else
                         {
@@ -301,12 +322,9 @@ class Program
                         cars.Add(5, new PassengerCar("Honda", 1990, "White", 2005231, 90, 5, 4, 300));
                         cars.Add(6, new OffRoadCar("Volkswagen", 2020, "Brown", 27257576, 197, 6, 1, 936, false, "Dirt"));
                         cars.Add(7, new OffRoadCar("Volkswagen", 2005, "Orange", 1935523, 150, 7, 2, 800, false, "Sand"));
-                        cars.Add(8, new LorryCar("Nissan", 1971, "Orange", 29121623, 7, 8, 204)); //Четыре одинаковых грузовика, чтобы потом привести пример удаления нескольких элементов
-                        cars.Add(9, new LorryCar("Nissan", 1971, "Orange", 29121623, 7, 8, 204));
-                        cars.Add(10, new LorryCar("Nissan", 1971, "Orange", 29121623, 7, 8, 204));
-                        cars.Add(11, new LorryCar("Nissan", 1971, "Orange", 29121623, 7, 8, 204));
-                        cars.Add(12, new LorryCar("Honda", 1972, "Grey", 10375098, 57, 9, 244));
-                        cars.Add(13, new LorryCar("Nissan", 2000, "Brown", 1005068, 40, 10, 150));
+                        cars.Add(8, new LorryCar("Nissan", 1971, "Orange", 29121623, 7, 8, 204)); 
+                        cars.Add(9, new LorryCar("Honda", 1972, "Grey", 10375098, 57, 9, 244));
+                        cars.Add(10, new LorryCar("Nissan", 2000, "Brown", 1005068, 40, 10, 150));
 
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Изначальная коллекция: ");
@@ -316,19 +334,12 @@ class Program
                         cars.Remove(1); //Удаляем первую базовую машину
                         cars.Remove(3); //Удаялем первую легковую машину
 
-                        LorryCar oFC = new LorryCar("Nissan", 1971, "Orange", 29121623, 7, 8, 204); //Тот самый повторяющийся грузовик
-                        List<int> listIndexs = new List<int>(); //Создадим лист с ключами элементов для удаления
-                        foreach(var car in cars) //Перебираем все пары ключ-значение
+                        LorryCar oFC = new LorryCar("Nissan", 1971, "Orange", 29121623, 7, 8, 204); 
+                        if (cars.ContainsValue(oFC))
                         {
-                            if (car.Value.Equals(oFC)) //Нашли нужный элемент
-                            {
-                                listIndexs.Add(car.Key); //Добавили его ключ
-                            }
+                            cars.Remove(oFC.id.number);
                         }
-                        foreach (int i in listIndexs) //Перебираем ключи
-                        {
-                            cars.Remove(i); //Удаляем
-                        }
+
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("\n\n\nКоллекция после удаления некоторых машин: ");
                         Console.ResetColor();
@@ -341,7 +352,26 @@ class Program
                         Console.ResetColor();
 
                         Console.ForegroundColor = ConsoleColor.Blue;
-                        SortedDictionary<int, Car> carsClone = new SortedDictionary<int, Car>(cars); //Выполняем клонирование
+                        SortedDictionary<int, Car> carsClone = new SortedDictionary<int, Car>(); //Выполняем клонирование
+                        foreach (var el in cars)
+                        {
+                            if (el.Value is OffRoadCar)
+                            {
+                                carsClone.Add(el.Key, (OffRoadCar)((OffRoadCar)el.Value).Clone());
+                            }
+                            else if (el.Value is PassengerCar)
+                            {
+                                carsClone.Add(el.Key, (PassengerCar)((PassengerCar)el.Value).Clone());
+                            }
+                            else if (el.Value is LorryCar)
+                            {
+                                carsClone.Add(el.Key, (LorryCar)((LorryCar)el.Value).Clone());
+                            }
+                            else
+                            {
+                                carsClone.Add(el.Key, (Car)el.Value.Clone());
+                            }
+                        }
                         Console.WriteLine("\n\nПроизводим клонировании коллекции");
                         Console.WriteLine("Изменим бренд машины №12 исходной коллекции: ");
                         Console.ResetColor();
@@ -360,19 +390,15 @@ class Program
                         Console.ForegroundColor = ConsoleColor.Blue;
                         LorryCar forSearch = new LorryCar("Nissan", 2000, "Brown", 1005068, 40, 10, 150);
                         Console.WriteLine("\n\nИщем грузовик с данными: Nissan, 2000, Brown, 1005068, 40, 10, 150");
-                        bool isFound = false;
-                        foreach (var car in cars) // Перебираем все пары ключ - значение
+                        if (cars.ContainsValue(forSearch))
                         {
-                            if (car.Value.Equals(forSearch)) // Нашли нужный элемент
-                            {
-                                Console.WriteLine($"Элемент найден. Номер машины: {car.Key}"); //Вывели
-                                isFound = true;
-                            }
+                            Console.WriteLine("Элемент найден");
                         }
-                        if (!isFound)
+                        else
                         {
-                            Console.WriteLine($"Элемент не найден");
+                            Console.WriteLine("Элемет не найден");
                         }
+                        
                         Console.ResetColor();
 
                         Console.ForegroundColor = ConsoleColor.Blue;
@@ -388,8 +414,7 @@ class Program
                         //int countRepeat = CorrectInputInt(1, 100);
                         int countRepeat = 100; //Количество повторов замеров времени
                         TestCollections TC = new TestCollections(1000);
-                        TC.SearchAllLaunch(countRepeat);
-                        //var testColletions = new TestCollections(1000);
+                        TC.Search(countRepeat);
                         Console.ForegroundColor = ConsoleColor.Blue;
                         Console.Write("\n\nВведите что-нибудь, чтобы выйти в меню: ");
                         Console.ResetColor();

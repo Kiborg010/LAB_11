@@ -299,58 +299,30 @@ namespace ClassLibrary1
             if (obj == null)
             {
                 return -1;
+            };
+            if (obj is not Car)
+            {
+                return -1;
             }
             Car car = obj as Car;
-            int f = String.Compare(this.Brend, car.Brend);
-            if (f == 0)
+            List<int> flags = new List<int>(); // Лист для хранения всех результатов сравнения
+            flags.Add(String.Compare(this.Brend, car.Brend)); // Добавляем их
+            flags.Add(ComparerInt(this.Year, car.Year));
+            flags.Add(String.Compare(this.Colour, car.Colour));
+            flags.Add(ComparerInt(this.Cost, car.Cost));
+            flags.Add(ComparerInt(this.Clearance, car.Clearance));
+            flags.Add(ComparerInt(this.id.number, car.id.number));
+            int index1 = flags.IndexOf(1); // Индекс первой единицы - когда первый раз первый элемент больше второго
+            int index2 = flags.IndexOf(-1); // Индекс первой минус единицы - когда первый раз второй элемент больше первого
+            if ((index1 == -1) && (index2 == -1)) // Если 1 и -1 не найдены, значит все результаты сравнения 0 и элементы одинаковые
             {
-                f = ComparerInt(this.Year, car.Year);
-                if (f == 0)
-                {
-                    f = String.Compare(this.Colour, car.Colour);
-                    if (f == 0)
-                    {
-                        f = ComparerInt(this.Cost, car.Cost);
-                        if (f == 0)
-                        {
-                            f = ComparerInt(this.Clearance, car.Clearance);
-                            if (f == 0)
-                            {
-                                f = ComparerInt(this.id.number, car.id.number);
-                                if (f == 0)
-                                {
-                                    return 0;
-                                }
-                                else
-                                {
-                                    return f;
-                                }
-                            }
-                            else
-                            {
-                                return f;
-                            }
-                        }
-                        else
-                        {
-                            return f;
-                        }
-                    }
-                    else
-                    {
-                        return f;
-                    }
-                }
-                else
-                {
-                    return f;
-                }
+                return 0;
             }
-            else
+            if ((index2 == -1) || ((index1 != -1) && (index1 < index2))) //Первый элемент может быть больше только тогда, когда он по всем параметрам больше или равен второму, либо когда 1 появилась раньше, чем -1. То есть, если идти по пунктам сравнения по порядку, то у первого элемента более раний параметр будет больше, чем у соответствующего параметра у второго элемента
             {
-                return f;
+                return 1;
             }
-            
+            return -1;
         }
 
         public object Clone() //Метод клонирования для интерфейса ICloneable
